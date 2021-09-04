@@ -8,38 +8,43 @@ public class Tree {
 	private Node root;
 	private int height;
 
-	public Tree(int n) {
-		Node node = new Node(n, null, null);
-		this.add(node, this.root);
-	}
+//	public Tree(int n) {
+//		Node node = new Node(n, null, null, null);
+//		this.add(node, this.root);
+//	}
 
 	public Tree(int[] arr) {
 		if (arr != null) {
 			for (int i = 0; i < arr.length; i++) {
-				Node n = new Node(arr[i], null, null);
+				Node n = new Node(arr[i], null, null, null);
 				this.add(n, this.root);
 			}
 		}
-		// this.root = null; porque pense que era buena idea dejar esto aca lpm
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////
 	// Añadir Nodo al Arbol
 
-	public void add(Node newNode, Node pivote) {
-		if (this.root == null) {
+	public void add(int n) {
+		Node node = new Node(n, null, null, null);
+		add(node, this.root);
+	}
+
+	private void add(Node newNode, Node pivote) {
+		if (isEmpty()) {
 			this.root = newNode;
 		} else {
 			if (newNode.getValue() < pivote.getValue()) {
 				if (pivote.getLeft() == null) {
 					pivote.setLeft(newNode);
+					newNode.setParent(pivote);
 				} else
 					add(newNode, pivote.getLeft());
 			}
-
 			if (newNode.getValue() > pivote.getValue()) {
 				if (pivote.getRight() == null) {
 					pivote.setRight(newNode);
+					newNode.setParent(pivote);
 				} else {
 					add(newNode, pivote.getRight());
 				}
@@ -52,7 +57,7 @@ public class Tree {
 
 	public List<Integer> getElementAtLevel(int level) {
 		ArrayList<Integer> elements = new ArrayList<>();
-		if (this.root != null) {
+		if (!isEmpty()) {
 			elements.addAll(getElementAtLevel(level, this.root, 0));
 		}
 		return elements;
@@ -80,15 +85,15 @@ public class Tree {
 /////////////////////////////////////////////////////////////////////////////////////
 	// Eliminar Nodo Del Arbol
 
-	public Boolean delete(Integer value) {
+	public boolean delete(Integer value) {
 		boolean result = false;
-		if (this.root != null) {
+		if (!isEmpty()) {
 			result = delete(value, this.root);
 		}
 		return result;
 	}
 
-	private Boolean delete(Integer value, Node pivote) {
+	private boolean delete(Integer value, Node pivote) {
 		boolean result = false;
 
 		if (value < pivote.getValue()) {
@@ -106,7 +111,63 @@ public class Tree {
 				return false;
 			}
 		} else {
-			// TODO
+			
+				// en caso de ser una hoja lo elimina con las siguiente lineas
+				if (pivote.getLeft() == null && pivote.getRight() == null) {
+					Node parent = pivote.getParent();
+					if (parent == null ) {
+						this.root = null;
+					}else {
+						result = setParentNode(parent, value, null);						
+					}
+				}
+				// ------------------------------------------------------------------//
+				if (pivote.getLeft() != null) {
+					Node next = getMaxNode(pivote.getLeft());
+					int v = next.getValue();
+					delete(v,next);
+					pivote.setValue(v);
+//					if (next.getLeft() != null) {
+//						next.getFather().setRight(next.getLeft());
+//						result = true;
+//					}
+//					if (pivote.getLeft().getValue() == next.getValue()) {
+//						next.getFather().setLeft(null);
+//						result = true;
+//					}
+				} else if (pivote.getRight() != null) {
+					Node next = getMinNode(pivote.getRight());
+					int v = next.getValue();
+					delete(v,next);
+					pivote.setValue(next.getValue());
+//					if (next.getLeft() != null) {
+//						next.getFather().setLeft(next.getRight());
+//						result = true;
+//					}
+//					if (pivote.getRight().getValue() == next.getValue()) {
+//						next.getFather().setRight(null);
+//						result = true;
+//					}
+			}
+			
+		}
+
+		return result;
+	}
+
+	public boolean setParentNode(Node father, int value, Node newValue) {
+		boolean result = false;
+		if (father.getLeft() != null) {
+			if (father.getLeft().getValue() == value) {
+				father.setLeft(newValue);
+				result = true;
+			}
+		}
+		if (father.getRight() != null) {
+			if (father.getRight().getValue() == value) {
+				father.setRight(newValue);
+				result = true;
+			}
 		}
 		return result;
 	}
@@ -116,45 +177,44 @@ public class Tree {
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////
-	// Devolver Lista de la Rama mas Larga 
+	// Devolver Lista de la Rama mas Larga
 
 	public List<Integer> getLongestBranch() {
 		ArrayList<Integer> longesBranch = new ArrayList<Integer>();
-		if (this.root != null) {
+		if (!isEmpty()) {
 			longesBranch.addAll(getLongestBranch(this.root));
 
 		}
 		return longesBranch;
 	}
-	
+
 	private List<Integer> getLongestBranch(Node pivote) {
-        ArrayList<Integer> longestBranch = new ArrayList<>();
-        ArrayList<Integer> leftBranch = new ArrayList<>();
-        ArrayList<Integer> rightBranch = new ArrayList<>();
-        longestBranch.add(pivote.getValue());
- 
-            if (pivote.getLeft() != null) {
-                leftBranch.addAll(getLongestBranch(pivote.getLeft()));
-            }
-            if (pivote.getRight() != null) {
-                rightBranch.addAll(getLongestBranch(pivote.getRight()));
-            }
-            
-            if (leftBranch.size() > rightBranch.size()) {
-            	longestBranch.addAll(leftBranch);
-            } 
-            else {
-            	longestBranch.addAll(rightBranch);
-            } 
-        return longestBranch;
-    }
-	
+		ArrayList<Integer> longestBranch = new ArrayList<>();
+		ArrayList<Integer> leftBranch = new ArrayList<>();
+		ArrayList<Integer> rightBranch = new ArrayList<>();
+		longestBranch.add(pivote.getValue());
+
+		if (pivote.getLeft() != null) {
+			leftBranch.addAll(getLongestBranch(pivote.getLeft()));
+		}
+		if (pivote.getRight() != null) {
+			rightBranch.addAll(getLongestBranch(pivote.getRight()));
+		}
+
+		if (leftBranch.size() > rightBranch.size()) {
+			longestBranch.addAll(leftBranch);
+		} else {
+			longestBranch.addAll(rightBranch);
+		}
+		return longestBranch;
+	}
+
 /////////////////////////////////////////////////////////////////////////////////////
 	// Devolver Lista de los Nodos Frontera del Arbol
 
 	public List<Integer> getFrontera() {
 		ArrayList<Integer> leaf = new ArrayList<>();
-		if (this.root != null) {
+		if (!isEmpty()) {
 			leaf.addAll(getFrontera(this.root));
 		}
 		return leaf;
@@ -198,41 +258,60 @@ public class Tree {
 /////////////////////////////////////////////////////////////////////////////////////
 	// Devolver El Valor Maximo o Minimo del Arbol
 
-	public int getMinElem() {
-		if (root != null) {
+	public Integer getMinElement() {
+		if (!isEmpty()) {
 			Node reco = root;
 			while (reco.getLeft() != null) {
 				reco = reco.getLeft();
 			}
 			return reco.getValue();
 		}
-		return 0;
+		return null;
 	}
 
-	public int getMaxElem() {
-		if (root != null) {
+	public Integer getMaxElement() {
+		if (!isEmpty()) {
 			Node reco = root;
 			while (reco.getRight() != null) {
 				reco = reco.getRight();
 			}
 			return reco.getValue();
 		}
-		return 0;
+		return (Integer) null;
+	}
+
+	public Node getMaxNode(Node n) {
+		Node reco = n;
+		if (n != null) {
+			while (reco.getRight() != null) {
+				reco = reco.getRight();
+			}
+			return reco;
+		}
+		return reco;
+	}
+
+	public Node getMinNode(Node n) {
+		Node reco = n;
+		if (n != null) {
+			while (reco.getLeft() != null) {
+				reco = reco.getLeft();
+			}
+			return reco;
+		}
+		return reco;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////
 
-	
-	
 	public List<Integer> roadSumList() {
 		ArrayList<Integer> sumLeaf = new ArrayList<>();
-		if (this.root != null) {
+		if (!isEmpty()) {
 			int sum = 0;
 			sumLeaf.addAll(roadSumList(this.root, sum));
 		}
 		return sumLeaf;
 	}
-		
 
 	private List<Integer> roadSumList(Node pivote, int sum) {
 		ArrayList<Integer> leaf = new ArrayList<>();
@@ -247,7 +326,7 @@ public class Tree {
 		}
 		if (pivote.getRight() != null) {
 			sum = sum + pivote.getValue();
-			leaf.addAll((roadSumList(pivote.getRight(),sum)));
+			leaf.addAll((roadSumList(pivote.getRight(), sum)));
 		}
 
 		return leaf;
@@ -257,7 +336,7 @@ public class Tree {
 	// Imprimir en PreOrden Los Nodos Del Arbol Binario
 
 	public void printPreOrder() {
-		if (root != null) {
+		if (!isEmpty()) {
 			printPreOrder(this.root);
 		}
 	}
@@ -265,22 +344,24 @@ public class Tree {
 	private void printPreOrder(Node pivote) {
 		if (pivote != null) {
 			System.out.print(pivote.getValue() + " ");
-			if (pivote.getLeft() != null)
+			if (pivote.getLeft() != null) {
 				printPreOrder(pivote.getLeft());
-			else
+			} else {
 				System.out.print("- ");
+			}
 
-			if (pivote.getRight() != null)
+			if (pivote.getRight() != null) {
 				printPreOrder(pivote.getRight());
-			else
+			} else {
 				System.out.print("-  ");
+			}
 		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////
 	// Imprimir en InOrden Los Nodos Del Arbol Binario
 	public void printInOrder() {
-		if (this.root != null) {
+		if (!isEmpty()) {
 			printInOrder(this.root);
 		}
 	}
@@ -298,7 +379,7 @@ public class Tree {
 /////////////////////////////////////////////////////////////////////////////////////
 // Imprimir en PosOrden Los Nodos Del Arbol Binario
 	public void printPosOrder() {
-		if (this.root != null) {
+		if (!isEmpty()) {
 			printPosOrder(this.root);
 		}
 	}
@@ -307,6 +388,7 @@ public class Tree {
 		if (pivote.getLeft() != null) {
 			printPosOrder(pivote.getLeft());
 		}
+
 		if (pivote.getRight() != null) {
 			printPosOrder(pivote.getRight());
 		}
@@ -318,7 +400,7 @@ public class Tree {
 
 	public boolean hasElem(Integer info) {
 		boolean result = false;
-		if (this.root != null) {
+		if (!isEmpty()) {
 			result = hasElem(info, this.root);
 		}
 		return result;
@@ -361,10 +443,10 @@ public class Tree {
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////
-	// FUNCIONES AUXILIARES NO REQUERIDAS PARA EL LA TAREA ENTREGABLE
+// FUNCIONES AUXILIARES NO REQUERIDAS PARA EL LA TAREA ENTREGABLE
 /////////////////////////////////////////////////////////////////////////////////////
-	// NO SE PIDE EN EL ENUNCIADO PERO ME SIRVIO PARA NO ANDAR DIBUJANDO EL ARBOL A
-	// CADA RATO
+// NO SE PIDE EN EL ENUNCIADO PERO ME SIRVIO PARA NO ANDAR DIBUJANDO EL ARBOL A
+// CADA RATO
 
 	String[] levels;
 
@@ -386,5 +468,4 @@ public class Tree {
 			imprimirNivel(pivote.getLeft(), nextLevel + 1);
 		}
 	}
-
 }

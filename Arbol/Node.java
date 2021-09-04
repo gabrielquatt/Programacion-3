@@ -4,8 +4,10 @@ public class Node {
 
     private Integer value;
     private Node left, right;
+    private Node parent;
 
-    public Node(Integer dato, Node izq, Node der) {
+    public Node(Integer dato, Node izq, Node der, Node parent) {
+    	this.parent = parent;
         this.value = dato;
         this.left = izq;
         this.right = der;
@@ -33,5 +35,13 @@ public class Node {
     public void setValue(Integer dato) {
         this.value = dato;
     }
+
+	public Node getParent() {
+		return parent;
+	}
+
+	public void setParent(Node father) {
+		this.parent = father;
+	}
 
 }
