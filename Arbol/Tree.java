@@ -8,11 +8,6 @@ public class Tree {
 	private Node root;
 	private int height;
 
-//	public Tree(int n) {
-//		Node node = new Node(n, null, null, null);
-//		this.add(node, this.root);
-//	}
-
 	public Tree(int[] arr) {
 		if (arr != null) {
 			for (int i = 0; i < arr.length; i++) {
@@ -29,7 +24,12 @@ public class Tree {
 		Node node = new Node(n, null, null, null);
 		add(node, this.root);
 	}
-
+	
+	/**
+	 *  O(h) donde el peor de los casos tendra que ir a la altura maxima del arbol
+	 * @param newNode
+	 * @param pivote nodo puntero.
+	 */
 	private void add(Node newNode, Node pivote) {
 		if (isEmpty()) {
 			this.root = newNode;
@@ -63,6 +63,13 @@ public class Tree {
 		return elements;
 	}
 
+	/**
+	 * O(n) en el peor de los casos voy a buscar hasta el ultimo nivel
+	 * @param level
+	 * @param pivote
+	 * @param currentLevel
+	 * @return
+	 */
 	private List<Integer> getElementAtLevel(int level, Node pivote, int currentLevel) {
 		ArrayList<Integer> elements = new ArrayList<>();
 		if (level == currentLevel) {
@@ -93,6 +100,12 @@ public class Tree {
 		return result;
 	}
 
+	/**
+	 * O(h) en el peor de los casos borro un elemento Hoja 
+	 * @param value
+	 * @param pivote
+	 * @return
+	 */
 	private boolean delete(Integer value, Node pivote) {
 		boolean result = false;
 
@@ -111,8 +124,6 @@ public class Tree {
 				return false;
 			}
 		} else {
-			
-				// en caso de ser una hoja lo elimina con las siguiente lineas
 				if (pivote.getLeft() == null && pivote.getRight() == null) {
 					Node parent = pivote.getParent();
 					if (parent == null ) {
@@ -121,41 +132,31 @@ public class Tree {
 						result = setParentNode(parent, value, null);						
 					}
 				}
-				// ------------------------------------------------------------------//
 				if (pivote.getLeft() != null) {
 					Node next = getMaxNode(pivote.getLeft());
 					int v = next.getValue();
+					
 					delete(v,next);
 					pivote.setValue(v);
-//					if (next.getLeft() != null) {
-//						next.getFather().setRight(next.getLeft());
-//						result = true;
-//					}
-//					if (pivote.getLeft().getValue() == next.getValue()) {
-//						next.getFather().setLeft(null);
-//						result = true;
-//					}
 				} else if (pivote.getRight() != null) {
 					Node next = getMinNode(pivote.getRight());
 					int v = next.getValue();
 					delete(v,next);
 					pivote.setValue(next.getValue());
-//					if (next.getLeft() != null) {
-//						next.getFather().setLeft(next.getRight());
-//						result = true;
-//					}
-//					if (pivote.getRight().getValue() == next.getValue()) {
-//						next.getFather().setRight(null);
-//						result = true;
-//					}
-			}
-			
+			}	
 		}
-
 		return result;
 	}
 
-	public boolean setParentNode(Node father, int value, Node newValue) {
+	/**
+	 * O(1)
+	 *  al padre le borro el hijo si es una hoja
+	 * @param father
+	 * @param value
+	 * @param newValue
+	 * @return
+	 */
+	private boolean setParentNode(Node father, int value, Node newValue) {
 		boolean result = false;
 		if (father.getLeft() != null) {
 			if (father.getLeft().getValue() == value) {
@@ -171,11 +172,7 @@ public class Tree {
 		}
 		return result;
 	}
-
-	public void setRoot(Node n) {
-		this.root = n;
-	}
-
+	
 /////////////////////////////////////////////////////////////////////////////////////
 	// Devolver Lista de la Rama mas Larga
 
@@ -188,6 +185,11 @@ public class Tree {
 		return longesBranch;
 	}
 
+	/**
+	 * O(n) tengo que recorrer el arbol completo siempre
+	 * @param pivote
+	 * @return
+	 */
 	private List<Integer> getLongestBranch(Node pivote) {
 		ArrayList<Integer> longestBranch = new ArrayList<>();
 		ArrayList<Integer> leftBranch = new ArrayList<>();
@@ -220,6 +222,11 @@ public class Tree {
 		return leaf;
 	}
 
+	/**
+	 * O(n) tengo que recorrer el arbol completo siempre
+	 * @param pivote
+	 * @return
+	 */
 	private List<Integer> getFrontera(Node pivote) {
 		ArrayList<Integer> leaf = new ArrayList<>();
 
@@ -245,6 +252,11 @@ public class Tree {
 		return height;
 	}
 
+	/**
+	 * O(n) tengo que recorrer el arbol completo siempre
+	 * @param n
+	 * @param level
+	 */
 	private void getHeight(Node n, int level) {
 		if (n != null) {
 			getHeight(n.getLeft(), level + 1);// si el nodo es null no se va a setear la altura
@@ -257,49 +269,67 @@ public class Tree {
 
 /////////////////////////////////////////////////////////////////////////////////////
 	// Devolver El Valor Maximo o Minimo del Arbol
-
-	public Integer getMinElement() {
-		if (!isEmpty()) {
-			Node reco = root;
-			while (reco.getLeft() != null) {
-				reco = reco.getLeft();
-			}
-			return reco.getValue();
-		}
-		return null;
-	}
-
+	
 	public Integer getMaxElement() {
 		if (!isEmpty()) {
-			Node reco = root;
-			while (reco.getRight() != null) {
-				reco = reco.getRight();
-			}
-			return reco.getValue();
+			return getMaxElement(this.root);
+		}else {
+			return null;			
 		}
-		return (Integer) null;
+	}
+	
+	/**
+	 * O(h) en peor de los casos la rama derecha es la mas grande
+	 * @param n
+	 * @return
+	 */
+	private  Integer getMaxElement(Node n) {
+		while (n.getRight() != null) {
+			n = n.getRight();
+		}
+		return n.getValue();
+	}
+	
+//	public Integer getMinElement() {
+//		if (!isEmpty()) {
+//			Node reco = root;
+//			while (reco.getLeft() != null) {
+//				reco = reco.getLeft();
+//			}
+//			return reco.getValue();
+//		}
+//		return null;
+//	}
+
+	/**
+	 * O(h) en peor de los casos la rama derecha es la mas grande
+	 * @param n
+	 * @return
+	 */
+	private Node getMaxNode(Node n) {
+		
+		if (n != null) {
+			while (n.getRight() != null) {
+				n = n.getRight();
+			}
+			return n;
+		}
+		return n;
 	}
 
-	public Node getMaxNode(Node n) {
-		Node reco = n;
+	/**
+	 * O(h) en peor de los casos la rama Izquierda es la mas grande
+	 * @param n
+	 * @return
+	 */
+	private Node getMinNode(Node n) {
 		if (n != null) {
-			while (reco.getRight() != null) {
-				reco = reco.getRight();
+			while (n.getLeft() != null) {
+				n = n.getLeft();
 			}
-			return reco;
+			return n;
 		}
-		return reco;
-	}
-
-	public Node getMinNode(Node n) {
-		Node reco = n;
-		if (n != null) {
-			while (reco.getLeft() != null) {
-				reco = reco.getLeft();
-			}
-			return reco;
-		}
-		return reco;
+		return n;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -313,19 +343,23 @@ public class Tree {
 		return sumLeaf;
 	}
 
+	/**
+	 * O(n) siempre tiene que recorrer todos los nodos
+	 * @param pivote
+	 * @param sum
+	 * @return
+	 */
 	private List<Integer> roadSumList(Node pivote, int sum) {
 		ArrayList<Integer> leaf = new ArrayList<>();
 
+		sum = sum + pivote.getValue();
 		if (pivote.getLeft() == null && pivote.getRight() == null) {
-			sum = sum + pivote.getValue();
 			leaf.add(sum);
 		}
 		if (pivote.getLeft() != null) {
-			int l = sum + pivote.getValue();
-			leaf.addAll(roadSumList(pivote.getLeft(), l));
+			leaf.addAll(roadSumList(pivote.getLeft(), sum));
 		}
 		if (pivote.getRight() != null) {
-			sum = sum + pivote.getValue();
 			leaf.addAll((roadSumList(pivote.getRight(), sum)));
 		}
 
@@ -341,6 +375,10 @@ public class Tree {
 		}
 	}
 
+	/**
+	 *  O(n)
+	 * @param pivote
+	 */
 	private void printPreOrder(Node pivote) {
 		if (pivote != null) {
 			System.out.print(pivote.getValue() + " ");
@@ -366,6 +404,10 @@ public class Tree {
 		}
 	}
 
+	/**
+	 *  O(n)
+	 * @param pivote
+	 */
 	private void printInOrder(Node pivote) {
 		if (pivote.getLeft() != null) {
 			printInOrder(pivote.getLeft());
@@ -384,6 +426,10 @@ public class Tree {
 		}
 	}
 
+	/**
+	 *  O(n)
+	 * @param pivote
+	 */
 	private void printPosOrder(Node pivote) {
 		if (pivote.getLeft() != null) {
 			printPosOrder(pivote.getLeft());
@@ -406,6 +452,12 @@ public class Tree {
 		return result;
 	}
 
+	/**
+	 * O(n) en el pero de los casos no esta el elemento en el arbol
+	 * @param info
+	 * @param pivote
+	 * @return
+	 */
 	private boolean hasElem(Integer info, Node pivote) {
 		boolean result = false;
 		if (info == pivote.getValue()) {
@@ -428,6 +480,10 @@ public class Tree {
 
 /////////////////////////////////////////////////////////////////////////////////////
 
+	/**
+	 * O(1)
+	 * @return
+	 */
 	public boolean isEmpty() {
 		boolean result = true;
 		if (this.root != null) {
@@ -438,34 +494,11 @@ public class Tree {
 
 /////////////////////////////////////////////////////////////////////////////////////
 
+	/**
+	 * O(1)
+	 * @return
+	 */
 	public Integer getRoot() {
 		return this.root.getValue();
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////
-// FUNCIONES AUXILIARES NO REQUERIDAS PARA EL LA TAREA ENTREGABLE
-/////////////////////////////////////////////////////////////////////////////////////
-// NO SE PIDE EN EL ENUNCIADO PERO ME SIRVIO PARA NO ANDAR DIBUJANDO EL ARBOL A
-// CADA RATO
-
-	String[] levels;
-
-	public void imprimirNivel() {
-		levels = new String[this.getHeight() + 1];
-
-		System.out.println("----------------------------------");
-		imprimirNivel(root, 0);
-		for (int i = 0; i < levels.length; i++) {
-			System.out.println(levels[i] + " En nivel: " + i);
-		}
-		System.out.println("----------------------------------");
-	}
-
-	public void imprimirNivel(Node pivote, int nextLevel) {
-		if (pivote != null) {
-			levels[nextLevel] = pivote.getValue() + ", " + ((levels[nextLevel] != null) ? levels[nextLevel] : "");
-			imprimirNivel(pivote.getRight(), nextLevel + 1);
-			imprimirNivel(pivote.getLeft(), nextLevel + 1);
-		}
 	}
 }
